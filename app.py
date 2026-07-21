@@ -5,35 +5,72 @@ from groq import Groq
 from dotenv import load_dotenv
 import os
 import numpy as np
+import json
+import requests as req
 
 load_dotenv()
 client_groq = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 app = Flask(__name__)
 
+REGISTRY_FILE = "phone_registry.json"
+
+def load_registry():
+    if os.path.exists(REGISTRY_FILE):
+        with open(REGISTRY_FILE, 'r') as f:
+            return json.load(f)
+    return {}
+
+def format_result(result: dict) -> str:
+    prediction = result.get("prediction", "UNKNOWN").upper()
+    attack_type = result.get("attack_type", "Unknown")
+    risk_level = result.get("risk_level", "Unknown")
+    confidence = result.get("confidence", 0)
+    red_flags = result.get("red_flags", [])
+    explanation = result.get("explanation", "No explanation available.")
+    safe_action = result.get("safe_action", "Stay cautious.")
+
+    if prediction == "LEGITIMATE":
+        message = "✅ LEGITIMATE\n\n"
+    else:
+        message = "🚨 SCAM DETECTED\n\n"
+
+    message += (
+        f"🎯 Attack Type: {attack_type}\n"
+        f"⚠️ Risk Level: {risk_level}\n"
+        f"📊 Confidence: {confidence}%\n\n"
+    )
+
+    message += "🔴 Red Flags:\n"
+    if red_flags:
+        for flag in red_flags:
+            message += f"• {flag}\n"
+    else:
+        message += "• None detected\n"
+
+    message += f"\n📢 What's Happening:\n{explanation}\n\n"
+    message += f"✅ What To Do:\n{safe_action}"
+
+    return message
+
 # Load classifier
 with open('model/scam_classifier_v2.pkl', 'rb') as f:
     classifier = pickle.load(f)
 
-# Load embedding model name and initialize
 with open('model/embedding_model_name.pkl', 'rb') as f:
     model_name = pickle.load(f)
 
-embedder = SentenceTransformer(model_name)  
+embedder = SentenceTransformer(model_name)
 
 
 def get_llm_explanation(text, prediction, confidence, risk_level):
     prompt = f"""
-## ROLE
-You are FraudShield AI, an expert citizen safety assistant deployed by the Ministry of Home Affairs, India. You help ordinary citizens — including elderly people with limited tech knowledge — understand whether they are being scammed, and what to do immediately.
+You are FraudShield AI, a citizen safety assistant for India deployed by the Ministry of Home Affairs.
 
-## CONTEXT
-India registered over 1.14 million cybercrime complaints in 2023. "Digital arrest" scams — where fraudsters impersonate CBI, ED, TRAI, or Customs officers and trap victims in fake video call interrogations — stole over Rs 1,776 crore in just 9 months of 2024. Your job is to protect citizens at the moment of contact, before any money is lost.
-
-A citizen has just reported the following suspicious message or call to FraudShield AI:
+Analyze this call transcript or message and return ONLY a JSON object, nothing else:
 "{text}"
 
-Our detection system has analysed this and returned:
+Our detection system returned:
 - Classification: {prediction}
 - Risk Level: {risk_level}
 
@@ -58,15 +95,11 @@ Rules:
             messages=[{"role": "user", "content": prompt}],
             max_tokens=300
         )
-
         raw = response.choices[0].message.content.strip()
-        
-        # safely parse JSON
-        import json
         start = raw.find("{")
         end = raw.rfind("}") + 1
         return json.loads(raw[start:end])
-    
+
     except Exception as e:
         print("Groq Error:", e)
         return {
@@ -77,6 +110,7 @@ Rules:
             "safe_action": "Call 1930 or visit cybercrime.gov.in if you suspect fraud."
         }
 
+
 @app.route('/classify', methods=['POST'])
 def classify():
     data = request.get_json()
@@ -85,28 +119,25 @@ def classify():
 
     text = data['text']
     embedding = embedder.encode([text])
-    
     prediction = classifier.predict(embedding)[0]
     label = 'SCAM' if prediction == 1 else 'LEGITIMATE'
-    
     score = classifier.decision_function(embedding)[0]
     confidence = round(min(abs(score) * 55, 99), 2)
-    
     risk_level = ('HIGH' if confidence > 85 and label == 'SCAM'
                   else 'MEDIUM' if label == 'SCAM'
                   else 'LOW')
-
     analysis = get_llm_explanation(text, label, confidence, risk_level)
 
     return jsonify({
-    'prediction': label,
-    'confidence': confidence,
-    'risk_level': risk_level,
-    'attack_type': analysis.get('attack_type'),
-    'red_flags': analysis.get('red_flags'),
-    'explanation': analysis.get('explanation'),
-    'safe_action': analysis.get('safe_action')
-})
+        'prediction': label,
+        'confidence': confidence,
+        'risk_level': risk_level,
+        'attack_type': analysis.get('attack_type'),
+        'red_flags': analysis.get('red_flags'),
+        'explanation': analysis.get('explanation'),
+        'safe_action': analysis.get('safe_action')
+    })
+
 
 @app.route('/classify_file', methods=['POST'])
 def classify_file():
@@ -115,7 +146,6 @@ def classify_file():
         return jsonify({'error': 'No file path provided'}), 400
 
     file_path = data['file_path']
-    
     if not os.path.exists(file_path):
         return jsonify({'error': 'File not found'}), 404
 
@@ -125,31 +155,72 @@ def classify_file():
     if not text:
         return jsonify({'error': 'File is empty'}), 400
 
-    # same logic as /classify from here
     embedding = embedder.encode([text])
     prediction = classifier.predict(embedding)[0]
     label = 'SCAM' if prediction == 1 else 'LEGITIMATE'
     score = classifier.decision_function(embedding)[0]
-    confidence = round(min(abs(score) * 40, 99), 2)
+    confidence = round(min(abs(score) * 55, 99), 2)
     risk_level = ('HIGH' if confidence > 85 and label == 'SCAM'
                   else 'MEDIUM' if label == 'SCAM'
                   else 'LOW')
     analysis = get_llm_explanation(text, label, confidence, risk_level)
 
     return jsonify({
-    'prediction': label,
-    'confidence': confidence,
-    'risk_level': risk_level,
-    'attack_type': analysis.get('attack_type'),
-    'red_flags': analysis.get('red_flags'),
-    'explanation': analysis.get('explanation'),
-    'safe_action': analysis.get('safe_action')
-})
+        'prediction': label,
+        'confidence': confidence,
+        'risk_level': risk_level,
+        'attack_type': analysis.get('attack_type'),
+        'red_flags': analysis.get('red_flags'),
+        'explanation': analysis.get('explanation'),
+        'safe_action': analysis.get('safe_action')
+    })
+
+
+@app.route('/analyse-call', methods=['POST'])
+def analyse_call():
+    data = request.get_json()
+    if not data or 'phone' not in data or 'transcript' not in data:
+        return jsonify({'error': 'phone and transcript required'}), 400
+
+    phone = data['phone']
+    transcript = data['transcript']
+
+    embedding = embedder.encode([transcript])
+    prediction = classifier.predict(embedding)[0]
+    label = 'SCAM' if prediction == 1 else 'LEGITIMATE'
+    score = classifier.decision_function(embedding)[0]
+    confidence = round(min(abs(score) * 55, 99), 2)
+    risk_level = ('HIGH' if confidence > 85 and label == 'SCAM'
+                  else 'MEDIUM' if label == 'SCAM'
+                  else 'LOW')
+    analysis = get_llm_explanation(transcript, label, confidence, risk_level)
+
+    result = {
+        'prediction': label,
+        'confidence': confidence,
+        'risk_level': risk_level,
+        'attack_type': analysis.get('attack_type'),
+        'red_flags': analysis.get('red_flags'),
+        'explanation': analysis.get('explanation'),
+        'safe_action': analysis.get('safe_action')
+    }
+
+    registry = load_registry()
+    if phone in registry:
+        chat_id = registry[phone]
+        message = format_result(result)
+        telegram_url = f"https://api.telegram.org/bot{os.getenv('TELEGRAM_BOT_TOKEN')}/sendMessage"
+        req.post(telegram_url, json={'chat_id': chat_id, 'text': message})
+    else:
+        print(f"Phone {phone} not registered on Telegram bot")
+
+    return jsonify(result)
 
 
 @app.route('/health', methods=['GET'])
 def health():
     return jsonify({'status': 'running'})
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
