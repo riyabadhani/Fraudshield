@@ -35,45 +35,47 @@ A citizen has just reported the following suspicious message or call to FraudShi
 
 Our detection system has analysed this and returned:
 - Classification: {prediction}
-- Confidence Score: {confidence}%
 - Risk Level: {risk_level}
 
-## EXAMPLES OF GOOD RESPONSES
+Return this exact JSON structure:
+{{
+  "risk_level": "{risk_level}",
+  "attack_type": "short label like Digital Arrest Scam or KYC Fraud or Fake Bank Call",
+  "red_flags": ["specific red flag 1", "specific red flag 2", "specific red flag 3"],
+  "explanation": "2-3 sentence plain English explanation a 60-year-old can understand. If SCAM start with Warning: or Caution:. If LEGITIMATE start with This appears to be legitimate.",
+  "safe_action": "1-2 specific action steps. Always include call 1930 or visit cybercrime.gov.in if SCAM."
+}}
 
-Example 1 — SCAM detected:
-"This is a classic digital arrest scam. Real CBI or ED officers never contact citizens over WhatsApp video calls, demand money transfers, or ask you to stay on camera — these are illegal tactics used by fraudsters to create panic. Hang up immediately, do not transfer any money, and report this call to the National Cyber Crime Helpline by calling 1930 or visiting cybercrime.gov.in."
-
-Example 2 — LEGITIMATE detected:
-"This message appears to be a routine bank notification with no signs of fraud. Legitimate bank alerts inform you of transactions but never ask for your OTP, PIN, or to transfer money for verification. No action is needed, but always stay cautious and never share your OTP with anyone."
-
-## YOUR TASK
-Based on the classification above, write a response with exactly these 3 parts:
-
-1. WHAT IS HAPPENING — In 1-2 sentences, explain what type of scam this is (or why it looks legitimate). Be specific — name the tactic if it's a scam (digital arrest, fake warrant, isolation tactic, money transfer demand, etc.)
-
-2. WHY THIS IS A RED FLAG (only if SCAM) — In 1 sentence, state one clear reason real government agencies never behave this way.
-
-3. WHAT TO DO NOW — Give 2-3 specific action steps. If it's a scam always include: do not transfer money, hang up, and call 1930 or visit cybercrime.gov.in.
-
-## STRICT RULES
-- Write in simple, calm English that a 60-year-old can understand
-- Never use words like "ML model", "classifier", "confidence score", or "algorithm"
-- Never be alarmist or use ALL CAPS
-- Keep total response under 120 words
-- If risk level is HIGH, start with: "Warning: This is almost certainly a scam."
-- If risk level is MEDIUM, start with: "Caution: This shows signs of a scam."
-- If prediction is LEGITIMATE, start with: "This appears to be a legitimate message."
+Rules:
+- Return ONLY the JSON object, no extra text, no markdown backticks
+- Never use technical words like classifier, model, algorithm
+- If LEGITIMATE, set red_flags to empty list []
+- Keep explanation under 60 words
 """
     try:
         response = client_groq.chat.completions.create(
             model="llama-3.3-70b-versatile",
             messages=[{"role": "user", "content": prompt}],
-            max_tokens=200
+            max_tokens=300
         )
-        return response.choices[0].message.content
+
+        raw = response.choices[0].message.content.strip()
+        
+        # safely parse JSON
+        import json
+        start = raw.find("{")
+        end = raw.rfind("}") + 1
+        return json.loads(raw[start:end])
+    
     except Exception as e:
         print("Groq Error:", e)
-        return "AI explanation is temporarily unavailable."
+        return {
+            "risk_level": risk_level,
+            "attack_type": "Unknown",
+            "red_flags": [],
+            "explanation": "AI explanation temporarily unavailable.",
+            "safe_action": "Call 1930 or visit cybercrime.gov.in if you suspect fraud."
+        }
 
 @app.route('/classify', methods=['POST'])
 def classify():
@@ -94,15 +96,17 @@ def classify():
                   else 'MEDIUM' if label == 'SCAM'
                   else 'LOW')
 
-    explanation = get_llm_explanation(text, label, confidence, risk_level)
+    analysis = get_llm_explanation(text, label, confidence, risk_level)
 
     return jsonify({
-        'text': text,
-        'prediction': label,
-        'confidence': confidence,
-        'risk_level': risk_level,
-        'explanation': explanation
-    })
+    'prediction': label,
+    'confidence': confidence,
+    'risk_level': risk_level,
+    'attack_type': analysis.get('attack_type'),
+    'red_flags': analysis.get('red_flags'),
+    'explanation': analysis.get('explanation'),
+    'safe_action': analysis.get('safe_action')
+})
 
 @app.route('/classify_file', methods=['POST'])
 def classify_file():
@@ -130,14 +134,17 @@ def classify_file():
     risk_level = ('HIGH' if confidence > 85 and label == 'SCAM'
                   else 'MEDIUM' if label == 'SCAM'
                   else 'LOW')
-    explanation = get_llm_explanation(text, label, confidence, risk_level)
+    analysis = get_llm_explanation(text, label, confidence, risk_level)
 
     return jsonify({
-        'prediction': label,
-        'confidence': confidence,
-        'risk_level': risk_level,
-        'explanation': explanation
-    })
+    'prediction': label,
+    'confidence': confidence,
+    'risk_level': risk_level,
+    'attack_type': analysis.get('attack_type'),
+    'red_flags': analysis.get('red_flags'),
+    'explanation': analysis.get('explanation'),
+    'safe_action': analysis.get('safe_action')
+})
 
 
 @app.route('/health', methods=['GET'])
