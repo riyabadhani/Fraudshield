@@ -69,14 +69,17 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     registry = load_registry()
 
-    if chat_id in registry.values():
-        await update.message.reply_text("✅ You are already registered. You will receive scam alerts automatically.")
+    # check if this phone number is already registered
+    if text in registry:
+        await update.message.reply_text("✅ This number is already registered. You will receive scam alerts automatically.")
         return
 
     if text.isdigit() and len(text) == 10:
         registry[text] = chat_id
         save_registry(registry)
         await update.message.reply_text("✅ Registered! You will receive scam alerts here automatically.")
+    elif text.isdigit() and len(text) != 10:
+        await update.message.reply_text("❌ Invalid number. Please send a valid 10-digit Indian mobile number.")
     else:
         await update.message.reply_text("Please send your 10-digit phone number to register.")
 
