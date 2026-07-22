@@ -1,162 +1,206 @@
-# FraudShield AI Android App
+# FraudShield AI 🛡️
 
-Minimal Android app in Kotlin for receiving shared call recordings, uploading them to a local backend, and showing per-recording scam analysis.
+An AI-powered platform to detect digital arrest scams in India in real time — before any money is lost.
 
-## Features
+---
 
-- Appears in Android's native share sheet for `audio/*`
-- Accepts shared `.mp3` and `.wav` recordings
-- Saves recordings into app-local storage
-- Uploads recordings to local backend over multipart/form-data
-- Sends logged-in phone number with each upload
-- Shows a dark-mode recordings list
-- Opens a per-recording analysis screen on tap
-- Shows Telegram bot setup CTA after login
+## Problem Statement
 
-## Current Flow
+India registered over 1.14 million cybercrime complaints in 2023. "Digital arrest" scams — where fraudsters impersonate CBI, ED, TRAI, or Customs officers and trap victims in fake video call interrogations — stole over ₹1,776 crore in just 9 months of 2024. Most victims are elderly citizens with limited tech knowledge who have no way to verify if a call is real or fake.
 
-1. User opens the app.
-2. If not logged in, app shows phone number + password screen.
-3. If already logged in, app opens the recordings screen directly.
-4. User shares a call recording from the Phone app into this app.
-5. App saves the file locally.
-6. App uploads the file to the upload backend.
-7. Upload backend transcribes the call and forwards transcript to FraudShield.
-8. App stores the returned analysis against that recording.
-9. User taps a recording to open its analysis page.
+FraudShield AI solves this by analysing suspicious call transcripts instantly and telling the citizen exactly what is happening and what to do — before any money is lost.
 
-## Project Location
+---
 
-Android app:
+## How It Works
 
-`apps/android-share-upload`
+1. User receives a suspicious call and records it on the app
+2. App transcribes the call recording into text using Whisper
+3. Transcript is sent to FraudShield AI's Flask API along with the user's phone number
+4. Multilingual NLP model classifies the call as SCAM or LEGITIMATE
+5. Groq LLM generates a structured plain language explanation — attack type, red flags, and action steps
+6. Result is delivered to the user instantly via Telegram bot and shown on the app
 
-Sample upload backend added in this repo:
+---
 
-`services/transcription-backend/app.py`
+## Tech Stack
 
-## Backend Endpoints Used By The App
+- **Python** — core language
+- **Flask** — REST API backend
+- **sentence-transformers** — multilingual embeddings (paraphrase-multilingual-MiniLM-L12-v2)
+- **scikit-learn** — LinearSVC classifier
+- **Groq API** — LLaMA 3.3 70B for structured plain language explanation
+- **Telegram Bot API** — instant result delivery to citizen
+- **python-telegram-bot** — Telegram bot framework
+- **Whisper** — call transcription (friend's side)
 
-### App API / Login
+---
 
-- Base URL: `http://127.0.0.1:5000`
-- Used for:
-  - `POST /login`
+## Model Performance
 
-### Upload API
+Trained on 500+ real and synthesized Indian scam transcripts covering digital arrest, KYC fraud, fake bank calls, customs scams, and more.
 
-- Base URL: `http://127.0.0.1:8000`
-- Used for:
-  - `POST /upload`
+| Metric | Score |
+|---|---|
+| Overall Accuracy | 91% |
+| Scam Recall | 98% |
+| Legit Precision | 97% |
+| Scam F1 | 0.92 |
+| Legit F1 | 0.90 |
 
-## Upload Request Format
+Supports English, Hindi, and Hinglish transcripts.
 
-The app sends multipart form-data to:
+---
 
-`POST http://127.0.0.1:8000/upload`
-
-Fields:
-
-- `phone_number`
-- `file`
-
-## Upload Response Format Expected By The App
-
-The app currently expects `/upload` to return JSON like:
+## API Response Format
 
 ```json
 {
-  "status": "ok",
-  "phone_number": "9999999999",
-  "transcript": "transcribed call text",
-  "detected_language": "hi",
-  "fraudshield_result": {
-    "prediction": "SCAM",
-    "confidence": 81.09,
-    "risk_level": "MEDIUM",
-    "attack_type": "Digital Arrest Scam",
-    "red_flags": [
-      "impersonates CBI officer",
-      "demand for money transfer",
-      "threat of arrest"
-    ],
-    "explanation": "Warning: This is a digital arrest scam. Fraudsters are impersonating government officers to steal money.",
-    "safe_action": "Do not transfer money. Hang up immediately. Call 1930 or visit cybercrime.gov.in."
-  },
-  "fraudshield_error": null
+  "prediction": "SCAM",
+  "confidence": 81.09,
+  "risk_level": "HIGH",
+  "attack_type": "Digital Arrest Scam",
+  "red_flags": [
+    "impersonates CBI officer",
+    "demands money transfer",
+    "threatens arrest"
+  ],
+  "explanation": "Warning: This is a digital arrest scam. Fraudsters are impersonating government officers to steal money.",
+  "safe_action": "Do not transfer money. Hang up immediately. Call 1930 or visit cybercrime.gov.in."
 }
 ```
 
-### App behavior
+---
 
-- If `fraudshield_result` exists, the app stores and shows the analysis
-- If `fraudshield_error` exists, the app marks analysis as failed and shows that error on the detail page
+## Project Structure
 
-## Login Behavior
-
-Current login is minimal:
-
-- App sends phone number + password to `POST /login`
-- If backend returns success, app stores local login session
-- Future launches skip login until app data is cleared
-
-## Telegram Bot Setup
-
-After login, the app shows a button that opens:
-
-`https://t.me/fraudsheild_ai_09_bot`
-
-User is instructed to open the bot once and send their phone number so alerts can later be routed by backend systems.
-
-## Run Locally
-
-### 1. Open in Android Studio
-
-Open:
-
-`apps/android-share-upload`
-
-### 2. Start your backends
-
-Make sure:
-
-- login / FraudShield API side is running on `127.0.0.1:5000`
-- upload/transcription backend is running on `127.0.0.1:8000`
-
-### 3. Connect phone with USB debugging
-
-Run:
-
-```powershell
-adb reverse tcp:5000 tcp:5000
-adb reverse tcp:8000 tcp:8000
+```
+fraudshield-ai/
+├── model/
+│   ├── scam_classifier_v3.pkl
+│   └── embedding_model_name.pkl
+├── app.py
+├── bot.py
+├── retrain.ipynb
+├── test_api.py
+├── test_file.py
+├── test_analyse.py
+├── fraudshield_dataset.csv
+├── requirements.txt
+├── .env                  ← never push this
+└── .gitignore
 ```
 
-### 4. Build and install
+---
 
-Build and run the app from Android Studio.
+## Setup Instructions
 
-## Notes
+1. Clone the repo:
+```bash
+git clone https://github.com/riyabadhani/fraudshield-ai.git
+cd fraudshield-ai
+```
 
-- Cleartext HTTP is enabled in debug builds only
-- Recording files are stored in app-private internal storage
-- Per-recording analysis is stored locally with recording metadata
-- The app currently uses a dark UI and a dedicated analysis screen
+2. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
 
-## Main Android Files
+3. Create a `.env` file in the root folder:
+```
+GROQ_API_KEY=your_groq_api_key
+TELEGRAM_BOT_TOKEN=your_telegram_bot_token
+```
 
-- `app/src/main/java/com/example/audioshareupload/MainActivity.kt`
-- `app/src/main/java/com/example/audioshareupload/RecordingDetailActivity.kt`
-- `app/src/main/java/com/example/audioshareupload/Uploader.kt`
-- `app/src/main/java/com/example/audioshareupload/AuthApi.kt`
-- `app/src/main/java/com/example/audioshareupload/RecordingStore.kt`
-- `app/src/main/res/layout/activity_main.xml`
-- `app/src/main/res/layout/activity_recording_detail.xml`
+4. Start the Flask API:
+```bash
+python app.py
+```
 
-## Known Limitations
+5. Start the Telegram bot:
+```bash
+python bot.py
+```
 
-- No logout flow yet
-- No playback UI
-- No delete/rename management
-- No background worker for deferred retries
-- Analysis currently depends on upload response from `/upload`
+---
+
+## API Routes
+
+### POST `/analyse-call`
+Main endpoint. Takes phone number and transcript, classifies, and sends Telegram alert.
+
+Request:
+```json
+{
+  "phone": "your_phone_no.",
+  "transcript": "I am CBI officer. Your Aadhaar is linked to money laundering. Transfer 50000 rupees immediately."
+}
+```
+
+### POST `/classify`
+Takes raw text, returns classification without Telegram alert.
+
+Request:
+```json
+{"text": "Your Aadhaar is linked to money laundering. Do not disconnect this call."}
+```
+
+### POST `/classify_file`
+Takes path to a `.txt` transcript file, returns classification.
+
+Request:
+```json
+{"file_path": "path/to/transcript.txt"}
+```
+
+### GET `/health`
+Returns API status.
+
+```json
+{"status": "running"}
+```
+
+---
+
+## Telegram Bot
+
+Citizens register once by sending their 10-digit phone number to the bot at [t.me/fraudsheild_ai_09_bot](https://t.me/fraudsheild_ai_09_bot).
+
+After registration, scam alerts are delivered automatically whenever a suspicious call is detected — no further action needed from the user.
+
+Alert format:
+```
+🚨 SCAM DETECTED
+
+🎯 Attack Type: Digital Arrest Scam
+⚠️ Risk Level: HIGH
+📊 Confidence: 92%
+
+🔴 Red Flags:
+• Impersonates CBI officer
+• Demands money transfer
+• Threatens arrest
+
+📢 What's Happening:
+Warning: This is a digital arrest scam.
+
+✅ What To Do:
+Do not transfer money. Call 1930 or visit cybercrime.gov.in.
+```
+
+---
+
+## Dataset
+
+- 500+ samples (scam + legitimate)
+- Covers English, Hindi, and Hinglish
+- Scam types: digital arrest, fake CBI/ED/TRAI/Customs, KYC fraud, fake bank calls, customs parcel scams
+- Legitimate types: real bank calls, government services, insurance, e-commerce, telecom, fraud awareness
+- Sources: MHA advisories, cybercrime.gov.in, news articles, victim transcripts, YouTube recordings
+
+---
+
+## Team
+
+- **Riya Badhani** — ML model, dataset, Flask API, Groq integration, Telegram bot
+- **Aryan Singh** — call transcription, frontend app, app chatbot
