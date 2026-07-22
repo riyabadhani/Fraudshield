@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="status_green">#2BD15F</color>
+    <color name="status_red">#FF5349</color>
+    <color name="screen_background">#0D0F10</color>
+    <color name="surface_primary">#17191A</color>
+    <color name="surface_secondary">#202224</color>
+    <color name="surface_stroke">#2D3133</color>
+    <color name="text_primary">#F4F4F4</color>
+    <color name="text_secondary">#A8ACAF</color>
+    <color name="text_tertiary">#8A8F94</color>
+    <color name="accent_blue">#2EA8F4</color>
+    <color name="accent_blue_dark">#1E8ED9</color>
+    <color name="badge_background">#2A2738</color>
+    <color name="badge_icon">#B9B2FF</color>
+    <color name="error_text">#FF6256</color>
+    <color name="input_fill">#1C1E20</color>
+    <color name="risk_pill_red">#3B1414</color>
+    <color name="risk_pill_green">#153721</color>
+</resources>

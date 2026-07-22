@@ -1,0 +1,90 @@
+[
+    {
+        "merged": "C:\\Users\\ARYAN\\.gradle\\daemon\\9.3.0\\com.example.audioshareupload.app-debug-27:\\drawable_ic_bell.xml.flat",
+        "source": "C:\\Users\\ARYAN\\.gradle\\daemon\\9.3.0\\com.example.audioshareupload.app-main-29:\\drawable\\ic_bell.xml"
+    },
+    {
+        "merged": "C:\\Users\\ARYAN\\.gradle\\daemon\\9.3.0\\com.example.audioshareupload.app-debug-27:\\drawable_ic_chevron_right.xml.flat",
+        "source": "C:\\Users\\ARYAN\\.gradle\\daemon\\9.3.0\\com.example.audioshareupload.app-main-29:\\drawable\\ic_chevron_right.xml"
+    },
+    {
+        "merged": "C:\\Users\\ARYAN\\.gradle\\daemon\\9.3.0\\com.example.audioshareupload.app-debug-27:\\drawable_risk_pill_background.xml.flat",
+        "source": "C:\\Users\\ARYAN\\.gradle\\daemon\\9.3.0\\com.example.audioshareupload.app-main-29:\\drawable\\risk_pill_background.xml"
+    },
+    {
+        "merged": "com.example.audioshareupload.app-debug-27:/xml_network_security_config.xml.flat",
+        "source": "com.example.audioshareupload.app-debug-28:/xml/network_security_config.xml"
+    },
+    {
+        "merged": "C:\\Users\\ARYAN\\.gradle\\daemon\\9.3.0\\com.example.audioshareupload.app-debug-27:\\drawable_input_background.xml.flat",
+        "source": "C:\\Users\\ARYAN\\.gradle\\daemon\\9.3.0\\com.example.audioshareupload.app-main-29:\\drawable\\input_background.xml"
+    },
+    {
+        "merged": "C:\\Users\\ARYAN\\.gradle\\daemon\\9.3.0\\com.example.audioshareupload.app-debug-27:\\drawable_file_badge_background.xml.flat",
+        "source": "C:\\Users\\ARYAN\\.gradle\\daemon\\9.3.0\\com.example.audioshareupload.app-main-29:\\drawable\\file_badge_background.xml"
+    },
+    {
+        "merged": "C:\\Users\\ARYAN\\.gradle\\daemon\\9.3.0\\com.example.audioshareupload.app-debug-27:\\drawable_analysis_card_background.xml.flat",
+        "source": "C:\\Users\\ARYAN\\.gradle\\daemon\\9.3.0\\com.example.audioshareupload.app-main-29:\\drawable\\analysis_card_background.xml"
+    },
+    {
+        "merged": "C:\\Users\\ARYAN\\.gradle\\daemon\\9.3.0\\com.example.audioshareupload.app-debug-27:\\drawable_ic_menu.xml.flat",
+        "source": "C:\\Users\\ARYAN\\.gradle\\daemon\\9.3.0\\com.example.audioshareupload.app-main-29:\\drawable\\ic_menu.xml"
+    },
+    {
+        "merged": "C:\\Users\\ARYAN\\.gradle\\daemon\\9.3.0\\com.example.audioshareupload.app-debug-27:\\drawable_ic_back.xml.flat",
+        "source": "C:\\Users\\ARYAN\\.gradle\\daemon\\9.3.0\\com.example.audioshareupload.app-main-29:\\drawable\\ic_back.xml"
+    },
+    {
+        "merged": "C:\\Users\\ARYAN\\.gradle\\daemon\\9.3.0\\com.example.audioshareupload.app-debug-27:\\drawable_status_dot.xml.flat",
+        "source": "C:\\Users\\ARYAN\\.gradle\\daemon\\9.3.0\\com.example.audioshareupload.app-main-29:\\drawable\\status_dot.xml"
+    },
+    {
+        "merged": "C:\\Users\\ARYAN\\.gradle\\daemon\\9.3.0\\com.example.audioshareupload.app-debug-27:\\layout_activity_recording_detail.xml.flat",
+        "source": "C:\\Users\\ARYAN\\.gradle\\daemon\\9.3.0\\com.example.audioshareupload.app-main-29:\\layout\\activity_recording_detail.xml"
+    },
+    {
+        "merged": "C:\\Users\\ARYAN\\.gradle\\daemon\\9.3.0\\com.example.audioshareupload.app-debug-27:\\layout_activity_main.xml.flat",
+        "source": "C:\\Users\\ARYAN\\.gradle\\daemon\\9.3.0\\com.example.audioshareupload.app-main-29:\\layout\\activity_main.xml"
+    },
+    {
+        "merged": "C:\\Users\\ARYAN\\.gradle\\daemon\\9.3.0\\com.example.audioshareupload.app-debug-27:\\drawable_telegram_logo.png.flat",
+        "source": "C:\\Users\\ARYAN\\.gradle\\daemon\\9.3.0\\com.example.audioshareupload.app-main-29:\\drawable\\telegram_logo.png"
+    },
+    {
+        "merged": "C:\\Users\\ARYAN\\.gradle\\daemon\\9.3.0\\com.example.audioshareupload.app-debug-27:\\drawable_analysis_status_background.xml.flat",
+        "source": "C:\\Users\\ARYAN\\.gradle\\daemon\\9.3.0\\com.example.audioshareupload.app-main-29:\\drawable\\analysis_status_background.xml"
+    },
+    {
+        "merged": "C:\\Users\\ARYAN\\.gradle\\daemon\\9.3.0\\com.example.audioshareupload.app-debug-27:\\drawable_app_icon.png.flat",
+        "source": "C:\\Users\\ARYAN\\.gradle\\daemon\\9.3.0\\com.example.audioshareupload.app-main-29:\\drawable\\app_icon.png"
+    },
+    {
+        "merged": "C:\\Users\\ARYAN\\.gradle\\daemon\\9.3.0\\com.example.audioshareupload.app-debug-27:\\drawable_recording_card_background.xml.flat",
+        "source": "C:\\Users\\ARYAN\\.gradle\\daemon\\9.3.0\\com.example.audioshareupload.app-main-29:\\drawable\\recording_card_background.xml"
+    },
+    {
+        "merged": "C:\\Users\\ARYAN\\.gradle\\daemon\\9.3.0\\com.example.audioshareupload.app-debug-27:\\drawable_ic_check.xml.flat",
+        "source": "C:\\Users\\ARYAN\\.gradle\\daemon\\9.3.0\\com.example.audioshareupload.app-main-29:\\drawable\\ic_check.xml"
+    },
+    {
+        "merged": "C:\\Users\\ARYAN\\.gradle\\daemon\\9.3.0\\com.example.audioshareupload.app-debug-27:\\xml_network_security_config.xml.flat",
+        "source": "C:\\Users\\ARYAN\\.gradle\\daemon\\9.3.0\\com.example.audioshareupload.app-debug-28:\\xml\\network_security_config.xml"
+    },
+    {
+        "merged": "C:\\Users\\ARYAN\\.gradle\\daemon\\9.3.0\\com.example.audioshareupload.app-debug-27:\\drawable_telegram_button_background.xml.flat",
+        "source": "C:\\Users\\ARYAN\\.gradle\\daemon\\9.3.0\\com.example.audioshareupload.app-main-29:\\drawable\\telegram_button_background.xml"
+    },
+    {
+        "merged": "C:\\Users\\ARYAN\\.gradle\\daemon\\9.3.0\\com.example.audioshareupload.app-debug-27:\\drawable_ic_audio_badge.xml.flat",
+        "source": "C:\\Users\\ARYAN\\.gradle\\daemon\\9.3.0\\com.example.audioshareupload.app-main-29:\\drawable\\ic_audio_badge.xml"
+    },
+    {
+        "merged": "C:\\Users\\ARYAN\\.gradle\\daemon\\9.3.0\\com.example.audioshareupload.app-debug-27:\\layout_item_recording.xml.flat",
+        "source": "C:\\Users\\ARYAN\\.gradle\\daemon\\9.3.0\\com.example.audioshareupload.app-main-29:\\layout\\item_recording.xml"
+    },
+    {
+        "merged": "C:\\Users\\ARYAN\\.gradle\\daemon\\9.3.0\\com.example.audioshareupload.app-debug-27:\\drawable_ic_warning.xml.flat",
+        "source": "C:\\Users\\ARYAN\\.gradle\\daemon\\9.3.0\\com.example.audioshareupload.app-main-29:\\drawable\\ic_warning.xml"
+    }
+]
